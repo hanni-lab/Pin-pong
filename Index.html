@@ -1,0 +1,89 @@
+@Vlad): import tkinter as tk
+import random
+from colorsys import hsv_to_rgb
+# --- Настройки ---
+W = 640
+H = 400
+X1 = 40
+X2 = W - 40
+BOT = H - 40
+CYAN = "#32ffc1"
+PINK = "#ff4d6d"
+ball = [W / 2, H / 2]
+vx = 5
+vy = 3
+me = H / 2
+ai = H / 2
+move = 0
+score = [0, 0]
+trail = []
+# --- Окно и холст ---
+root = tk.Tk()
+root.title("Пинг-понг")
+c = tk.Canvas(root, bg="#0f1020",
+width=W, height=H,
+highlightthickness=0)
+c.pack()
+# --- Вспомогательные функции ---
+def color(i):
+h = 0.5 + 0.3 * i / 12
+r, g, b = hsv_to_rgb(h, .7, 255)
+return "#%02x%02x%02x" % (
+int(r), int(g), int(b))
+KEYS = {"Up": -8, "Down": 8}
+def press(e):
+global move
+move = KEYS.get(e.keysym, 0)
+def release(e):
+global move
+move = 0
+root.bind("", press)
+root.bind("", release)
+def serve():
+global vx, vy
+ball[0] = W / 2
+ball[1] = H / 2
+vx = random.choice([-5, 5])
+vy = random.choice([-3, 3])
+def circle(x, y, r, col):
+c.create_oval(
+x - r, y - r, x + r, y + r,
+fill=col, outline="")
+def bar(x, y, col):
+c.create_line(x, y - 40, x, y + 40,
+fill=col, width=14,
+capstyle="round")
+def label(x, y, t, col):
+c.create_text(
+x, y, text=t, fill=col,
+font=("Arial", 36, "bold"))
+def draw():
+c.delete("all")
+c.create_line(
+W / 2, 10, W / 2, H - 10,
+fill="#2a2d55", width=4,
+dash=(10, 14))
+for i, (x, y) in enumerate(trail):
+r = 3 + i * 0.7
+circle(x, y, r, color(i))
+x, y = ball
+circle(x, y, 10, "white")
+bar(30, me, CYAN)
+bar(W - 30, ai, PINK)
+cx = W / 2
+label(cx - 60, 40, score[0], CYAN)
+label(cx + 60, 40, score[1], PINK)
+def hit(py):
+return abs(ball[1] - py) H - 10:
+vy = -vy
+if vx 0 and bx > X2 and hit(ai):
+vx = -min(vx * 1.06, 12)
+vy = (by - ai) / 6
+if bx W:
+score[0] += 1
+serve()
+draw()
+root.after(16, step)
+serve()
+step()
+root.mainloop()
