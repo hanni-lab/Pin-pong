@@ -1,89 +1,122 @@
-import tkinter as tk
-import random
-from colorsys import hsv_to_rgb
-# --- Настройки ---
-W = 640
-H = 400
-X1 = 40
-X2 = W - 40
-BOT = H - 40
-CYAN = "#32ffc1"
-PINK = "#ff4d6d"
-ball = [W / 2, H / 2]
-vx = 5
-vy = 3
-me = H / 2
-ai = H / 2
-move = 0
-score = [0, 0]
-trail = []
-# --- Окно и холст ---
-root = tk.Tk()
-root.title("Пинг-понг")
-c = tk.Canvas(root, bg="#0f1020",
-width=W, height=H,
-highlightthickness=0)
-c.pack()
-# --- Вспомогательные функции ---
-def color(i):
-h = 0.5 + 0.3 * i / 12
-r, g, b = hsv_to_rgb(h, .7, 255)
-return "#%02x%02x%02x" % (
-int(r), int(g), int(b))
-KEYS = {"Up": -8, "Down": 8}
-def press(e):
-global move
-move = KEYS.get(e.keysym, 0)
-def release(e):
-global move
-move = 0
-root.bind("", press)
-root.bind("", release)
-def serve():
-global vx, vy
-ball[0] = W / 2
-ball[1] = H / 2
-vx = random.choice([-5, 5])
-vy = random.choice([-3, 3])
-def circle(x, y, r, col):
-c.create_oval(
-x - r, y - r, x + r, y + r,
-fill=col, outline="")
-def bar(x, y, col):
-c.create_line(x, y - 40, x, y + 40,
-fill=col, width=14,
-capstyle="round")
-def label(x, y, t, col):
-c.create_text(
-x, y, text=t, fill=col,
-font=("Arial", 36, "bold"))
-def draw():
-c.delete("all")
-c.create_line(
-W / 2, 10, W / 2, H - 10,
-fill="#2a2d55", width=4,
-dash=(10, 14))
-for i, (x, y) in enumerate(trail):
-r = 3 + i * 0.7
-circle(x, y, r, color(i))
-x, y = ball
-circle(x, y, 10, "white")
-bar(30, me, CYAN)
-bar(W - 30, ai, PINK)
-cx = W / 2
-label(cx - 60, 40, score[0], CYAN)
-label(cx + 60, 40, score[1], PINK)
-def hit(py):
-return abs(ball[1] - py) H - 10:
-vy = -vy
-if vx 0 and bx > X2 and hit(ai):
-vx = -min(vx * 1.06, 12)
-vy = (by - ai) / 6
-if bx W:
-score[0] += 1
-serve()
-draw()
-root.after(16, step)
-serve()
-step()
-root.mainloop()
+import turtle
+
+# 1. Створення вікна гри
+wn = turtle.Screen()
+wn.title("Пін-Понг на Python")
+wn.bgcolor("black")
+wn.setup(width=800, height=600)
+wn.tracer(0)  # Зупиняє оновлення екрана для плавного руху
+
+# Рахунок
+score_a = 0
+score_b = 0
+
+# 2. Ракетка А (ліва)
+paddle_a = turtle.Turtle()
+paddle_a.speed(0)
+paddle_a.shape("square")
+paddle_a.color("white")
+paddle_a.shapesize(stretch_wid=5, stretch_len=1)  # Робимо прямокутник
+paddle_a.penup()
+paddle_a.goto(-350, 0)
+
+# 3. Ракетка Б (права)
+paddle_b = turtle.Turtle()
+paddle_b.speed(0)
+paddle_b.shape("square")
+paddle_b.color("white")
+paddle_b.shapesize(stretch_wid=5, stretch_len=1)
+paddle_b.penup()
+paddle_b.goto(350, 0)
+
+# 4. М'яч
+ball = turtle.Turtle()
+ball.speed(0)
+ball.shape("square")
+ball.color("red")
+ball.penup()
+ball.goto(0, 0)
+ball.dx = 0.15  # Швидкість руху по X
+ball.dy = 0.15  # Швидкість руху по Y
+
+# 5. Табло рахунку
+pen = turtle.Turtle()
+pen.speed(0)
+pen.color("white")
+pen.penup()
+pen.hideturtle()
+pen.goto(0, 260)
+pen.write("Гравець A: 0  |  Гравець Б: 0", align="center", font=("Courier", 20, "normal"))
+
+# --- Функції руху ракеток ---
+def paddle_a_up():
+    y = paddle_a.ycor()
+    if y < 240:  # Обмеження екрана
+        paddle_a.sety(y + 20)
+
+def paddle_a_down():
+    y = paddle_a.ycor()
+    if y > -240:
+        paddle_a.sety(y - 20)
+
+def paddle_b_up():
+    y = paddle_b.ycor()
+    if y < 240:
+        paddle_b.sety(y + 20)
+
+def paddle_b_down():
+    y = paddle_b.ycor()
+    if y > -240:
+        paddle_b.sety(y - 20)
+
+# Прив'язка клавіш управління
+wn.listen()
+# Управління лівою ракеткою (Клавіші W та S)
+wn.onkeypress(paddle_a_up, "w")
+wn.onkeypress(paddle_a_down, "s")
+# Управління правою ракеткою (Стрілки Вгору та Вниз)
+wn.onkeypress(paddle_b_up, "Up")
+wn.onkeypress(paddle_b_down, "Down")
+
+# --- Головний ігровий цикл ---
+while True:
+    wn.update()
+
+    # Рух м'яча
+    ball.setx(ball.xcor() + ball.dx)
+    ball.sety(ball.ycor() + ball.dy)
+
+    # Перевірка меж екрана (Зверху / Знизу)
+    if ball.ycor() > 290:
+        ball.sety(290)
+        ball.dy *= -1  # Зміна напрямку по Y
+
+    if ball.ycor() < -290:
+        ball.sety(-290)
+        ball.dy *= -1
+
+    # Вихід м'яча за праву межу (Гол для Гравця А)
+    if ball.xcor() > 390:
+        ball.goto(0, 0)
+        ball.dx *= -1
+        score_a += 1
+        pen.clear()
+        pen.write(f"Гравець A: {score_a}  |  Гравець Б: {score_b}", align="center", font=("Courier", 20, "normal"))
+
+    # Вихід м'яча за ліву межу (Гол для Гравця Б)
+    if ball.xcor() < -390:
+        ball.goto(0, 0)
+        ball.dx *= -1
+        score_b += 1
+        pen.clear()
+        pen.write(f"Гравець A: {score_a}  |  Гравець Б: {score_b}", align="center", font=("Courier", 20, "normal"))
+
+    # Зіткнення м'яча з правою ракеткою
+    if (ball.dx > 0) and (350 > ball.xcor() > 340) and (paddle_b.ycor() + 50 > ball.ycor() > paddle_b.ycor() - 50):
+        ball.setx(340)
+        ball.dx *= -1
+
+    # Зіткнення м'яча з лівою ракеткою
+    if (ball.dx < 0) and (-350 < ball.xcor() < -340) and (paddle_a.ycor() + 50 > ball.ycor() > paddle_a.ycor() - 50):
+        ball.setx(-340)
+        ball.dx *= -1
